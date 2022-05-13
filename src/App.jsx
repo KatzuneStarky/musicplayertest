@@ -1,10 +1,48 @@
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Library from "./screens/Library";
+import Feed from "./screens/Feed";
+import Trending from "./screens/Trending";
+import Player from "./screens/Player";
+import Favorites from "./screens/Favorites";
+import Sidebar from "./components/sidebar/Sidebar";
+import "./App.css";
+import Login from "./Auth/Login";
+import { setClientToken } from "./SpotifyApi";
 
-function App() {
-  return (
-    <div className="App">
-    </div>
+export default function App() {
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    const token = window.localStorage.getItem("token")
+    const hash = window.location.hash;
+    window.location.hash = ""
+
+    if(!token && hash){
+      const _token = hash.split("&")[0].split("=")[1];
+      window.localStorage.setItem("token", _token);
+      setToken(_token);
+      setClientToken(_token)
+    }else{
+      setToken(token);
+      setClientToken(token)
+    }
+  }, []);
+
+  return !token ? (
+    <Login />
+  ) : (
+    <BrowserRouter>
+      <div className="main-body">
+        <Sidebar />
+        <Routes>
+          <Route exact path="/" element={<Library />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/trending" element={<Trending />} />
+          <Route path="/player" element={<Player />} />
+          <Route path="/favorites" element={<Favorites />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
-
-export default App;
